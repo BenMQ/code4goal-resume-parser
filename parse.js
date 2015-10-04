@@ -1,17 +1,24 @@
 var path = require('path');
 var SomeHR = require('./src/SomeHR')();
 require('colors');
+var success = false;
+// setTimeout(main, 2000);
 
-console.log('Please, wait 2 sec to skip warnings'.bgRed.black);
-setTimeout(main, 2000);
+main()
 
 function main() {
   var files = process.argv.slice(2);
+  var exitCode;
   if (files.length === 0) {
     console.log("Usage: node parse.js [file ...]");
   } else {
     handleFile(files);
   }
+  process.on('exit', function(code) {
+    if (!success) {
+      process.exit(code === 0 ? -1 : code);
+    }
+  })
  }
 
 function handleFile(files, err) {
@@ -28,7 +35,6 @@ function handleFile(files, err) {
 
     /** @type {ParseBoy} */
     ParseBoy = Iam.needSomeoneToSortCV();
-
     ParseBoy.willHelpWithPleasure(files, function (PreparedFile) {
       ParseBoy.workingHardOn(PreparedFile, function (Resume) {
         ParseBoy.storeResume(PreparedFile, Resume, __dirname + '/compiled', function (err) {
@@ -40,6 +46,7 @@ function handleFile(files, err) {
 
           if (savedFiles == files.length) {
             console.log('Done');
+            success = true;
           }
         })
       });
